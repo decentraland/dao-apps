@@ -10,16 +10,14 @@ app.store(async (state, { event }) => {
   // Initial state
   if (state == null) {
     nextState = {
-      count: await getValue(),
+      katalysts: await getKatalysts()
     }
   }
 
   switch (event) {
-    case 'Increment':
-      nextState = { ...nextState, count: await getValue() }
-      break
-    case 'Decrement':
-      nextState = { ...nextState, count: await getValue() }
+    case 'AddKatalyst':
+    case 'RemoveKatalyst':
+      nextState = { ...nextState, katalysts: await getKatalysts() }
       break
     case events.SYNC_STATUS_SYNCING:
       nextState = { ...nextState, isSyncing: true }
@@ -32,6 +30,18 @@ app.store(async (state, { event }) => {
   return nextState
 })
 
-async function getValue() {
-  return parseInt(await app.call('value').toPromise(), 10)
+async function getKatalysts() {
+  const katalysts = []
+  const katalystCount = await app.call('katalystCount').toPromise()
+
+  for (let i = 0; i < katalystCount; i++) {
+    const katalystId = await app.call('katalystIds', i).toPromise()
+    const { id, owner, domain } = await app
+      .call('katalystById', katalystId)
+      .toPromise()
+
+    katalysts.push({ id, owner, domain })
+  }
+
+  return katalysts
 }
