@@ -8,6 +8,24 @@ function App() {
   const { katalysts, isSyncing } = appState
   const [owner, setOwner] = useState('')
   const [domain, setDomain] = useState('')
+  const [error, setError] = useState('')
+
+  function addKatalyst() {
+    let error = ''
+    if (owner.length != 42) {
+      error += 'Invalid Owner'
+    }
+
+    if (domain.length === 0 || domain.indexOf('://') === -1) {
+      error += '\nInvalid Domain'
+    }
+
+    if (!error) {
+      api.addKatalyst(owner, domain).toPromise()
+    }
+
+    setError(error)
+  }
 
   return (
     <Main>
@@ -16,51 +34,60 @@ function App() {
           <Syncing />
         ) : (
           <>
-            <h1>Katalysts</h1>
-            {katalysts.map(katalyst => (
-              <div
-                key={katalyst.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  alignContent: 'center',
-                  justifyContent: 'space-between',
-                  width: '40%'
-                }}
-              >
-                <p style={{ marginTop: '20px' }}>{katalyst.id}</p>
-                <p style={{ marginTop: '20px' }}>{katalyst.domain}</p>
-                <p style={{ marginTop: '20px' }}>{katalyst.owner}</p>
-                <Button
-                  mode="secondary"
-                  onClick={() => api.removeKatalyst(katalyst.id).toPromise()}
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-            <div>
-              <AddressInput
+            <Title>Katalysts</Title>
+            {katalysts.length ? (
+              <Table>
+                <thead>
+                  <tr>
+                    <th>Owner</th>
+                    <th>Domain</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {katalysts.map(katalyst => (
+                    <tr key={katalyst.id}>
+                      <td>{katalyst.owner}</td>
+                      <td>{katalyst.domain}</td>
+                      <td>
+                        <Button
+                          mode="secondary"
+                          onClick={() =>
+                            api.removeKatalyst(katalyst.id).toPromise()
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            ) : null}
+            <AddKatalyst>
+              <Input
                 type="text"
-                placeholder="0x123..."
+                placeholder="0xb4124cEB3451635DAcedd11767f004d8a28c6eE7"
+                name="owner"
                 value={owner}
                 onChange={e => setOwner(e.currentTarget.value)}
               />
-              <DomainInput
+              <Input
                 type="text"
-                placeholder="https://google.com/"
+                name="domain"
+                placeholder="https://decentraland.org"
                 value={domain}
                 onChange={e => setDomain(e.currentTarget.value)}
               />
-            </div>
-            <Buttons>
+              {error && <Error>{error}</Error>}
               <Button
-                mode="secondary"
-                onClick={() => api.addKatalyst(owner, domain).toPromise()}
+                mode="primary"
+                disabled={!owner.length || !domain.length}
+                onClick={addKatalyst}
               >
                 Add katalyst
               </Button>
-            </Buttons>
+            </AddKatalyst>
           </>
         )}
       </BaseLayout>
@@ -71,20 +98,49 @@ function App() {
 const BaseLayout = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   height: 100vh;
   flex-direction: column;
 `
 
-const Count = styled.h1`
-  font-size: 30px;
+const Title = styled.h1`
+  margin-top: 20px;
+  font-size: 28px;
 `
 
-const Buttons = styled.div`
-  display: grid;
-  grid-auto-flow: column;
-  grid-gap: 40px;
-  margin-top: 20px;
+const Table = styled.table`
+  border: solid 1px #ddeeee;
+  border-collapse: collapse;
+  border-spacing: 0;
+
+  thead th {
+    background-color: #d0faff;
+    border: solid 1px #ddeeee;
+    color: #333333;
+    padding: 10px;
+    text-align: left;
+  }
+
+  tbody td {
+    border: solid 1px #ddeeee;
+    color: #333;
+    padding: 10px;
+    text-shadow: 1px 1px 1px #fff;
+  }
+
+  tbody td button {
+    font-size: 13px;
+    padding: 4px 16px;
+  }
+
+  @media (max-width: 920px) {
+    font-size: 12px;
+
+    tbody td button {
+      font-size: 12px;
+      padding: 4px 16px;
+    }
+  }
 `
 
 const Syncing = styled.div.attrs({ children: 'Syncing…' })`
@@ -93,14 +149,42 @@ const Syncing = styled.div.attrs({ children: 'Syncing…' })`
   right: 20px;
 `
 
-const AddressInput = styled.input`
-  width: 300px;
-  font-size: 12px;
+const AddKatalyst = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-bottom: 20px;
 `
 
-const DomainInput = styled.input`
-  width: 200px;
-  font-size: 12p;
+const Input = styled.input`
+  width: 400px;
+  padding: 7px;
+  font-size: 14px;
+  margin-bottom: 20px;
+
+  ::-webkit-input-placeholder {
+    /* Chrome/Opera/Safari */
+    color: #d2d2d2;
+  }
+  ::-moz-placeholder {
+    /* Firefox 19+ */
+    color: #d2d2d2;
+  }
+  :-ms-input-placeholder {
+    /* IE 10+ */
+    color: #d2d2d2;
+  }
+  :-moz-placeholder {
+    /* Firefox 18- */
+    color: #d2d2d2;
+  }
+`
+
+const Error = styled.p`
+  color: #fd4949;
+  white-space: pre-line;
+  margin-bottom: 10px;
 `
 
 export default App
