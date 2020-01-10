@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { useAragonApi, useGuiStyle } from '@aragon/api-react'
-import { Main, Button } from '@aragon/ui'
+import { Main, DataView, Button, IdentityBadge } from '@aragon/ui'
 import styled from 'styled-components'
 
 function App() {
   const { api, appState } = useAragonApi()
   const { appearance } = useGuiStyle()
+
   const { katalysts, isSyncing } = appState
   const [owner, setOwner] = useState('')
   const [domain, setDomain] = useState('')
@@ -28,11 +29,6 @@ function App() {
     setError(error)
   }
 
-  const _katalysts = []
-  for (let i = 0; i < 10; i++) {
-    _katalysts.push(katalysts[0])
-  }
-
   return (
     <Main theme={appearance}>
       <BaseLayout>
@@ -41,37 +37,6 @@ function App() {
         ) : (
           <>
             <Title>Katalysts</Title>
-            {katalysts.length ? (
-              <TableLayout>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Owner</th>
-                      <th>Domain</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {_katalysts.map(katalyst => (
-                      <tr key={katalyst.id}>
-                        <td>{katalyst.owner}</td>
-                        <td>{katalyst.domain}</td>
-                        <td>
-                          <Button
-                            mode="normal"
-                            onClick={() =>
-                              api.removeKatalyst(katalyst.id).toPromise()
-                            }
-                          >
-                            Remove
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </TableLayout>
-            ) : null}
             <AddKatalyst>
               <Input
                 type="text"
@@ -96,6 +61,30 @@ function App() {
                 Add katalyst
               </Button>
             </AddKatalyst>
+
+            {katalysts.length ? (
+              <DataWrapper>
+                <DataView
+                  mode="table"
+                  fields={['Owner', 'Domain', 'Actions']}
+                  entries={katalysts}
+                  renderEntry={({ id, owner, domain }) => {
+                    const values = [
+                      <IdentityBadge entity={owner} />,
+                      <p>{domain}</p>,
+                      <Button
+                        mode="normal"
+                        onClick={() => api.removeKatalyst(id).toPromise()}
+                      >
+                        Remove
+                      </Button>
+                    ]
+
+                    return values
+                  }}
+                />
+              </DataWrapper>
+            ) : null}
           </>
         )}
       </BaseLayout>
@@ -107,55 +96,18 @@ const BaseLayout = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 100vh;
+  height: 100%;
   flex-direction: column;
 `
 
 const Title = styled.h1`
-  margin-top: 20px;
+  margin-top: 40px;
   font-size: 28px;
 `
 
-const TableLayout = styled.div`
-  max-height: 60%;
-  overflow-y: scroll;
-  border: 1px solid #e6e6e6;
+const DataWrapper = styled.div`
   width: 100%;
-
-  table {
-    border: solid 1px #ddeeee;
-    border-collapse: collapse;
-    border-spacing: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  thead th {
-    background-color: #d0faff;
-    border: solid 1px #ddeeee;
-    color: #333333;
-    padding: 10px;
-    text-align: left;
-  }
-
-  tbody td {
-    border: solid 1px #ddeeee;
-    padding: 10px;
-  }
-
-  tbody td button {
-    font-size: 13px;
-    padding: 4px 16px;
-  }
-
-  @media (max-width: 920px) {
-    font-size: 12px;
-
-    tbody td button {
-      font-size: 12px;
-      padding: 4px 16px;
-    }
-  }
+  margin-top: 40px;
 `
 
 const Syncing = styled.div.attrs({ children: 'Syncing…' })`
@@ -169,7 +121,7 @@ const AddKatalyst = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-bottom: 20px;
+  margin-top: 20px;
 `
 
 const Input = styled.input`
