@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { useAragonApi } from '@aragon/api-react'
+import { useAragonApi, useGuiStyle } from '@aragon/api-react'
 import { Main, Button } from '@aragon/ui'
 import styled from 'styled-components'
 
 function App() {
   const { api, appState } = useAragonApi()
+  const { appearance } = useGuiStyle()
   const { katalysts, isSyncing } = appState
   const [owner, setOwner] = useState('')
   const [domain, setDomain] = useState('')
@@ -27,8 +28,13 @@ function App() {
     setError(error)
   }
 
+  const _katalysts = []
+  for (let i = 0; i < 10; i++) {
+    _katalysts.push(katalysts[0])
+  }
+
   return (
-    <Main>
+    <Main theme={appearance}>
       <BaseLayout>
         {isSyncing ? (
           <Syncing />
@@ -36,33 +42,35 @@ function App() {
           <>
             <Title>Katalysts</Title>
             {katalysts.length ? (
-              <Table>
-                <thead>
-                  <tr>
-                    <th>Owner</th>
-                    <th>Domain</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {katalysts.map(katalyst => (
-                    <tr key={katalyst.id}>
-                      <td>{katalyst.owner}</td>
-                      <td>{katalyst.domain}</td>
-                      <td>
-                        <Button
-                          mode="secondary"
-                          onClick={() =>
-                            api.removeKatalyst(katalyst.id).toPromise()
-                          }
-                        >
-                          Remove
-                        </Button>
-                      </td>
+              <TableLayout>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Owner</th>
+                      <th>Domain</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {_katalysts.map(katalyst => (
+                      <tr key={katalyst.id}>
+                        <td>{katalyst.owner}</td>
+                        <td>{katalyst.domain}</td>
+                        <td>
+                          <Button
+                            mode="normal"
+                            onClick={() =>
+                              api.removeKatalyst(katalyst.id).toPromise()
+                            }
+                          >
+                            Remove
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </TableLayout>
             ) : null}
             <AddKatalyst>
               <Input
@@ -81,7 +89,7 @@ function App() {
               />
               {error && <Error>{error}</Error>}
               <Button
-                mode="primary"
+                mode="strong"
                 disabled={!owner.length || !domain.length}
                 onClick={addKatalyst}
               >
@@ -108,10 +116,19 @@ const Title = styled.h1`
   font-size: 28px;
 `
 
-const Table = styled.table`
-  border: solid 1px #ddeeee;
-  border-collapse: collapse;
-  border-spacing: 0;
+const TableLayout = styled.div`
+  max-height: 60%;
+  overflow-y: scroll;
+  border: 1px solid #e6e6e6;
+  width: 100%;
+
+  table {
+    border: solid 1px #ddeeee;
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    height: 100%;
+  }
 
   thead th {
     background-color: #d0faff;
@@ -123,9 +140,7 @@ const Table = styled.table`
 
   tbody td {
     border: solid 1px #ddeeee;
-    color: #333;
     padding: 10px;
-    text-shadow: 1px 1px 1px #fff;
   }
 
   tbody td button {
