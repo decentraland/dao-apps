@@ -5,6 +5,7 @@ const { getEventArgument } = require('@aragon/test-helpers/events')
 const { assertEvent } = require('@aragon/test-helpers/assertEvent')(web3)
 const { hash } = require('eth-ens-namehash')
 const deployDAO = require('./helpers/deployDAO')
+const sleep = require('./helpers/sleep')
 
 const KatalystApp = artifacts.require('KatalystApp.sol')
 
@@ -20,6 +21,11 @@ const ERROR_KATALYST_NOT_FOUND = 'ERROR_KATALYST_NOT_FOUND'
 const domain1 = 'https://decentraland-1.org'
 const domain2 = 'https://decentraland-2.org'
 const domain3 = 'https://decentraland-3.org'
+
+async function getBlockTimestamp() {
+  const block = await web3.eth.getBlock(web3.eth.blockNumber)
+  return block.timestamp
+}
 
 contract(
   'KatalystApp',
@@ -89,6 +95,7 @@ contract(
         assert.equal(katalystCount.toNumber(), 1)
 
         const katalystId = await app.katalystIds(0)
+
         assertEvent(receipt, 'AddKatalyst', {
           _id: katalystId,
           _owner: katalystOwner1,
@@ -102,6 +109,12 @@ contract(
         assert.equal(id, katalystId)
         assert.equal(owner, katalystOwner1)
         assert.equal(domain, domain1)
+
+        let isSet = await app.owners(katalystOwner1)
+        assert.equal(isSet, true)
+
+        isSet = await app.domains(web3.sha3(domain1))
+        assert.equal(isSet, true)
       })
 
       it('should remove a katalyst', async () => {
@@ -109,6 +122,7 @@ contract(
         assert.equal(katalystCount.toNumber(), 0)
 
         await app.addKatalyst(katalystOwner1, domain1, fromUser)
+        const startTimestamp = await getBlockTimestamp()
 
         katalystCount = await app.katalystCount()
         assert.equal(katalystCount.toNumber(), 1)
@@ -120,6 +134,11 @@ contract(
         assert.equal(katalyst[1], katalystOwner1)
         assert.equal(katalyst[2], domain1)
 
+        let katalystHistory = await app.katalystHistory(katalystId)
+
+        assert.equal(katalystHistory[0].toNumber(), startTimestamp)
+        assert.equal(katalystHistory[1].toNumber(), 0)
+
         const receipt = await app.removeKatalyst(katalystId, fromUser)
         assertEvent(receipt, 'RemoveKatalyst', {
           _id: katalystId,
@@ -127,14 +146,29 @@ contract(
           _domain: domain1
         })
 
+        const endTimestamp = await getBlockTimestamp()
+
         katalystCount = await app.katalystCount()
         assert.equal(katalystCount.toNumber(), 0)
 
         katalyst = await app.katalystById(katalystId)
+        // Katalyst struct should be preserved
+        assert.equal(katalyst[0], katalystId)
+        assert.equal(katalyst[1], katalystOwner1)
+        assert.equal(katalyst[2], domain1)
 
-        assert.equal(katalyst[0], ZERO_BYTES32)
-        assert.equal(katalyst[1], ZERO_ADDRESS)
-        assert.equal(katalyst[2], '')
+        katalystHistory = await app.katalystHistory(katalystId)
+
+        assert.equal(katalystHistory[0].toNumber(), startTimestamp)
+        assert.equal(katalystHistory[1].toNumber(), endTimestamp)
+
+        let isSet = await app.owners(katalystOwner1)
+        assert.equal(isSet, false)
+
+        isSet = await app.domains(web3.sha3(domain1))
+        assert.equal(isSet, false)
+
+        await assertRevert(app.katalystIds(0))
       })
 
       it('should add katalysts', async () => {
@@ -158,6 +192,12 @@ contract(
           assert.equal(id, katalystId)
           assert.equal(owner, katalystOwners[i])
           assert.equal(domain, domains[i])
+
+          let isSet = await app.owners(katalystOwners[i])
+          assert.equal(isSet, true)
+
+          isSet = await app.domains(web3.sha3(domains[i]))
+          assert.equal(isSet, true)
         }
       })
 
@@ -166,8 +206,13 @@ contract(
         assert.equal(katalystCount.toNumber(), 0)
 
         await app.addKatalyst(katalystOwner1, domain1, fromUser)
+        const katalystStartDate1 = await getBlockTimestamp()
+
         await app.addKatalyst(katalystOwner2, domain2, fromUser)
+        const katalystStartDate2 = await getBlockTimestamp()
+
         await app.addKatalyst(katalystOwner3, domain3, fromAnotherUser)
+        const katalystStartDate3 = await getBlockTimestamp()
 
         katalystCount = await app.katalystCount()
         assert.equal(katalystCount.toNumber(), 3)
@@ -186,15 +231,26 @@ contract(
         // The last katalyst (3) should be the first one then
         katalystId = await app.katalystIds(0)
         await app.removeKatalyst(katalystId, fromUser)
+        const katalystEndDate1 = await getBlockTimestamp()
+
+        let katalystHistory = await app.katalystHistory(katalystId)
+        assert.equal(katalystHistory[0].toNumber(), katalystStartDate1)
+        assert.equal(katalystHistory[1].toNumber(), katalystEndDate1)
+
+        let isSet = await app.owners(katalystOwner1)
+        assert.equal(isSet, false)
+
+        isSet = await app.domains(web3.sha3(domain1))
+        assert.equal(isSet, false)
 
         // Check that first katalyst was removed
         katalystIndex = await app.katalystIndexById(katalystId)
         katalyst = await app.katalystById(katalystId)
 
         assert(katalystIndex, 0)
-        assert.equal(katalyst[0], ZERO_BYTES32)
-        assert.equal(katalyst[1], ZERO_ADDRESS)
-        assert.equal(katalyst[2], '')
+        assert.equal(katalyst[0], katalystId)
+        assert.equal(katalyst[1], katalystOwner1)
+        assert.equal(katalyst[2], domain1)
 
         katalystCount = await app.katalystCount()
         assert.equal(katalystCount.toNumber(), 2)
@@ -223,15 +279,20 @@ contract(
         katalystId = await app.katalystIds(0)
 
         await app.removeKatalyst(katalystId, fromUser)
+        const katalystEndDate2 = await getBlockTimestamp()
+
+        katalystHistory = await app.katalystHistory(katalystId)
+        assert.equal(katalystHistory[0].toNumber(), katalystStartDate2)
+        assert.equal(katalystHistory[1].toNumber(), katalystEndDate2)
 
         // Check that third katalyst was removed
         katalystIndex = await app.katalystIndexById(katalystId)
         katalyst = await app.katalystById(katalystId)
 
         assert(katalystIndex, 0)
-        assert.equal(katalyst[0], ZERO_BYTES32)
-        assert.equal(katalyst[1], ZERO_ADDRESS)
-        assert.equal(katalyst[2], '')
+        assert.equal(katalyst[0], katalystId)
+        assert.equal(katalyst[1], katalystOwner3)
+        assert.equal(katalyst[2], domain3)
 
         katalystCount = await app.katalystCount()
         assert.equal(katalystCount.toNumber(), 1)
@@ -251,15 +312,21 @@ contract(
         let katalystId = await app.katalystIds(0)
         await app.removeKatalyst(katalystId, fromUser)
 
+        await sleep(1000)
+
         // Use same owner and domain
         await app.addKatalyst(katalystOwner1, domain1, fromUser)
         katalystId = await app.katalystIds(0)
         await app.removeKatalyst(katalystId, fromUser)
 
+        await sleep(1000)
+
         // Use same owner
         await app.addKatalyst(katalystOwner1, domain2, fromUser)
         katalystId = await app.katalystIds(0)
         await app.removeKatalyst(katalystId, fromUser)
+
+        await sleep(1000)
 
         // Use same domain
         await app.addKatalyst(katalystOwner2, domain1, fromUser)

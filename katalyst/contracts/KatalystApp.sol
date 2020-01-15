@@ -31,8 +31,17 @@ contract KatalystApp is AragonApp {
     // Katalyst ids
     bytes32[] public katalystIds;
 
-    event AddKatalyst(bytes32 indexed _id, address _owner, string _domain);
-    event RemoveKatalyst(bytes32 indexed _id, address _owner, string _domain);
+    struct KatalystHistory {
+        uint256 startTime;
+        uint256 endTime;
+    }
+
+    // Katalyst history
+    mapping(bytes32 => KatalystHistory) public katalystHistory;
+
+
+    event AddKatalyst(bytes32 indexed _id, address indexed _owner, string _domain);
+    event RemoveKatalyst(bytes32 indexed _id, address indexed _owner, string _domain);
 
     function initialize() public onlyInit {
         initialized();
@@ -45,16 +54,18 @@ contract KatalystApp is AragonApp {
     * @param _domain - domain of the katalyst
     */
     function addKatalyst(address _owner, string  _domain) external auth(MODIFY_ROLE) {
-        bytes32 domainHash = keccak256(_domain);
+        bytes32 domainHash = keccak256(abi.encodePacked(_domain));
 
         // Check if the owner and the domain are free
         require(!owners[_owner], ERROR_OWNER_IN_USE);
         require(!domains[domainHash], ERROR_DOMAIN_IN_USE);
 
+        uint256 startTime = block.timestamp;
+
         // Calculate a katalyst id
         bytes32 id = keccak256(
             abi.encodePacked(
-                block.timestamp,
+                startTime,
                 msg.sender,
                 _owner,
                 _domain
@@ -69,6 +80,11 @@ contract KatalystApp is AragonApp {
             id: id,
             owner: _owner,
             domain: _domain
+        });
+
+        katalystHistory[id] = KatalystHistory({
+            startTime: startTime,
+            endTime: 0
         });
 
         // Set owner and domain as used
@@ -92,7 +108,7 @@ contract KatalystApp is AragonApp {
     */
     function removeKatalyst(bytes32 _id) external auth(MODIFY_ROLE)  {
         Katalyst memory katalyst = katalystById[_id];
-        bytes32 domainHash = keccak256(katalyst.domain);
+        bytes32 domainHash = keccak256(abi.encodePacked(katalyst.domain));
 
         require(owners[katalyst.owner], ERROR_KATALYST_NOT_FOUND);
         require(domains[domainHash], ERROR_KATALYST_NOT_FOUND);
@@ -110,12 +126,13 @@ contract KatalystApp is AragonApp {
         katalystIds[removedIndex] = lastKatalystId;
         katalystIndexById[lastKatalystId] = removedIndex;
 
+        katalystHistory[_id].endTime = block.timestamp;
+
         emit RemoveKatalyst(_id, katalyst.owner, katalyst.domain);
 
         // Clean storage
         katalystIds.length--;
         delete katalystIndexById[_id];
-        delete katalystById[_id];
         owners[katalyst.owner] = false;
         domains[domainHash] = false;
 
