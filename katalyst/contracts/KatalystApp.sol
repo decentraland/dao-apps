@@ -18,6 +18,8 @@ contract KatalystApp is AragonApp {
         bytes32 id;
         address owner;
         string domain;
+        uint256 startTime;
+        uint256 endTime;
     }
 
     // Katalyst by id
@@ -30,15 +32,6 @@ contract KatalystApp is AragonApp {
     mapping(bytes32 => uint256) public katalystIndexById;
     // Katalyst ids
     bytes32[] public katalystIds;
-
-    struct KatalystHistory {
-        uint256 startTime;
-        uint256 endTime;
-    }
-
-    // Katalyst history
-    mapping(bytes32 => KatalystHistory) public katalystHistory;
-
 
     event AddKatalyst(bytes32 indexed _id, address indexed _owner, string _domain);
     event RemoveKatalyst(bytes32 indexed _id, address indexed _owner, string _domain);
@@ -79,10 +72,7 @@ contract KatalystApp is AragonApp {
         katalystById[id] = Katalyst({
             id: id,
             owner: _owner,
-            domain: _domain
-        });
-
-        katalystHistory[id] = KatalystHistory({
+            domain: _domain,
             startTime: startTime,
             endTime: 0
         });
@@ -107,7 +97,7 @@ contract KatalystApp is AragonApp {
     * @param _id - id of the katalyst
     */
     function removeKatalyst(bytes32 _id) external auth(MODIFY_ROLE)  {
-        Katalyst memory katalyst = katalystById[_id];
+        Katalyst storage katalyst = katalystById[_id];
         bytes32 domainHash = keccak256(abi.encodePacked(katalyst.domain));
 
         require(owners[katalyst.owner], ERROR_KATALYST_NOT_FOUND);
@@ -126,7 +116,8 @@ contract KatalystApp is AragonApp {
         katalystIds[removedIndex] = lastKatalystId;
         katalystIndexById[lastKatalystId] = removedIndex;
 
-        katalystHistory[_id].endTime = block.timestamp;
+        // Update end time
+        katalyst.endTime = block.timestamp;
 
         emit RemoveKatalyst(_id, katalyst.owner, katalyst.domain);
 
