@@ -200,16 +200,19 @@ contract(
         assert.equal(katalystCount.toNumber(), 0)
 
         let res = await app.addKatalyst(katalystOwner1, domain1, fromUser)
+        const katalystId1 = await app.katalystIds(0)
         const katalystStartDate1 = await getBlockTimestamp(
           res.logs[0].blockNumber
         )
 
         res = await app.addKatalyst(katalystOwner2, domain2, fromUser)
+        const katalystId2 = await app.katalystIds(1)
         const katalystStartDate2 = await getBlockTimestamp(
           res.logs[0].blockNumber
         )
 
         res = await app.addKatalyst(katalystOwner3, domain3, fromAnotherUser)
+        const katalystId3 = await app.katalystIds(2)
         const katalystStartDate3 = await getBlockTimestamp(
           res.logs[0].blockNumber
         )
@@ -222,19 +225,25 @@ contract(
         let katalystIndex = await app.katalystIndexById(katalystId)
         let katalyst = await app.katalystById(katalystId)
 
-        assert(katalystIndex, 2)
+        assert.equal(katalystIndex, 2)
         assert.equal(katalyst[0], katalystId)
         assert.equal(katalyst[1], katalystOwner3)
         assert.equal(katalyst[2], domain3)
 
         // Remove first one
-        // The last katalyst (3) should be the first one then
-        katalystId = await app.katalystIds(0)
-        const { logs } = await app.removeKatalyst(katalystId, fromUser)
+        const { logs } = await app.removeKatalyst(katalystId1, fromUser)
         const katalystEndDate1 = await getBlockTimestamp(logs[0].blockNumber)
 
-        //assert.equal(katalyst[3].toNumber(), katalystStartDate1)
-        //assert.equal(katalyst[4].toNumber(), katalystEndDate1)
+        // Check that first katalyst was removed (1)
+        katalyst = await app.katalystById(katalystId1)
+        katalystIndex = await app.katalystIndexById(katalystId)
+
+        assert.equal(katalystIndex, 0)
+        assert.equal(katalyst[0], katalystId1)
+        assert.equal(katalyst[1], katalystOwner1)
+        assert.equal(katalyst[2], domain1)
+        assert.equal(katalyst[3].toNumber(), katalystStartDate1)
+        assert.equal(katalyst[4].toNumber(), katalystEndDate1)
 
         let isSet = await app.owners(katalystOwner1)
         assert.equal(isSet, false)
@@ -242,67 +251,63 @@ contract(
         isSet = await app.domains(web3.sha3(domain1))
         assert.equal(isSet, false)
 
-        // Check that first katalyst was removed
-        katalystIndex = await app.katalystIndexById(katalystId)
-        katalyst = await app.katalystById(katalystId)
-
-        assert(katalystIndex, 0)
-        assert.equal(katalyst[0], katalystId)
-        assert.equal(katalyst[1], katalystOwner1)
-        assert.equal(katalyst[2], domain1)
-
+        // Check katalyst count
         katalystCount = await app.katalystCount()
         assert.equal(katalystCount.toNumber(), 2)
 
+        // The last katalyst (3) should be the first one then
         katalystId = await app.katalystIds(0)
         katalystIndex = await app.katalystIndexById(katalystId)
         katalyst = await app.katalystById(katalystId)
 
-        assert(katalystIndex, 0)
+        assert.equal(katalystIndex, 0)
+        assert.equal(katalystId, katalystId3)
         assert.equal(katalyst[0], katalystId)
         assert.equal(katalyst[1], katalystOwner3)
         assert.equal(katalyst[2], domain3)
 
-        // Check values for second katalyst
+        // Check values for second katalyst (2)
         katalystId = await app.katalystIds(1)
         katalystIndex = await app.katalystIndexById(katalystId)
         katalyst = await app.katalystById(katalystId)
 
-        assert(katalystIndex, 1)
+        assert.equal(katalystIndex, 1)
+        assert.equal(katalystId, katalystId2)
         assert.equal(katalyst[0], katalystId)
         assert.equal(katalyst[1], katalystOwner2)
         assert.equal(katalyst[2], domain2)
 
-        // Remove first one
-        // The last katalyst (2) should be the first one then
-        katalystId = await app.katalystIds(0)
+        // Remove first one (3)
+        await app.removeKatalyst(katalystId3, fromUser)
+        const katalystEndDate3 = await getBlockTimestamp()
 
-        await app.removeKatalyst(katalystId, fromUser)
-        const katalystEndDate2 = await getBlockTimestamp()
-
-        // assert.equal(katalyst[3].toNumber(), katalystStartDate2)
-        // assert.equal(katalyst[4].toNumber(), katalystEndDate2)
-
-        // Check that third katalyst was removed
+        // Check that third katalyst was removed (3)
+        katalyst = await app.katalystById(katalystId3)
         katalystIndex = await app.katalystIndexById(katalystId)
-        katalyst = await app.katalystById(katalystId)
 
-        assert(katalystIndex, 0)
-        assert.equal(katalyst[0], katalystId)
+        assert.equal(katalystIndex, 0)
+        assert.equal(katalyst[0], katalystId3)
         assert.equal(katalyst[1], katalystOwner3)
         assert.equal(katalyst[2], domain3)
+        assert.equal(katalyst[3].toNumber(), katalystStartDate3)
+        assert.equal(katalyst[4].toNumber(), katalystEndDate3)
 
+        // Check katalyst count
         katalystCount = await app.katalystCount()
         assert.equal(katalystCount.toNumber(), 1)
 
+        // The last katalyst (2) should be the first one then
         katalystId = await app.katalystIds(0)
         katalystIndex = await app.katalystIndexById(katalystId)
-        katalyst = await app.katalystById(katalystId)
 
-        assert(katalystIndex, 0)
+        katalyst = await app.katalystById(katalystId)
+        assert.equal(katalystIndex, 0)
+        assert.equal(katalystId, katalystId2)
         assert.equal(katalyst[0], katalystId)
         assert.equal(katalyst[1], katalystOwner2)
         assert.equal(katalyst[2], domain2)
+        assert.equal(katalyst[3].toNumber(), katalystStartDate2)
+        assert.equal(katalyst[4].toNumber(), 0)
       })
 
       it('should re-add a katalyst with an owner and/or domain removed', async () => {
