@@ -17,6 +17,9 @@ const ZERO_BYTES32 =
 const ERROR_OWNER_IN_USE = 'ERROR_OWNER_IN_USE'
 const ERROR_DOMAIN_IN_USE = 'ERROR_DOMAIN_IN_USE'
 const ERROR_KATALYST_NOT_FOUND = 'ERROR_KATALYST_NOT_FOUND'
+const ERROR_OWNER_EMPTY = 'ERROR_OWNER_EMPTY'
+const ERROR_DOMAIN_EMPTY = 'ERROR_DOMAIN_EMPTY'
+const ERROR_KATALYST_ALREADY_REMOVED = 'ERROR_KATALYST_ALREADY_REMOVED'
 
 const domain1 = 'https://decentraland-1.org'
 const domain2 = 'https://decentraland-2.org'
@@ -115,6 +118,27 @@ contract(
 
         isSet = await app.domains(web3.sha3(domain1))
         assert.equal(isSet, true)
+      })
+
+      it('reverts to add a katalyst with empty owner', async () => {
+        await assertRevert(
+          app.addKatalyst(ZERO_ADDRESS, domain1, fromUser),
+          ERROR_OWNER_EMPTY
+        )
+      })
+
+      it('reverts to add a katalyst with empty domain', async () => {
+        await assertRevert(
+          app.addKatalyst(katalystOwner1, '', fromUser),
+          ERROR_DOMAIN_EMPTY
+        )
+      })
+
+      it('reverts to add a katalyst with empty owner and domain', async () => {
+        await assertRevert(
+          app.addKatalyst(ZERO_ADDRESS, '', fromUser),
+          ERROR_OWNER_EMPTY
+        )
       })
 
       it('should remove a katalyst', async () => {
@@ -362,7 +386,7 @@ contract(
         )
       })
 
-      it('reverts when trying to remove a non-existing katalyst', async () => {
+      it('reverts when trying to remove an already removed katalyst', async () => {
         await app.addKatalyst(katalystOwner1, domain1, fromUser)
 
         const katalystId = await app.katalystIds(0)
@@ -371,7 +395,21 @@ contract(
 
         await assertRevert(
           app.removeKatalyst(katalystId, fromUser),
+          ERROR_KATALYST_ALREADY_REMOVED
+        )
+      })
+
+      it('reverts when trying to remove a non-existing id katalyst', async () => {
+        await assertRevert(
+          app.removeKatalyst(ZERO_BYTES32.replace('0x00', '0x01'), fromUser),
           ERROR_KATALYST_NOT_FOUND
+        )
+      })
+
+      it('reverts when trying to remove a zero id katalyst', async () => {
+        await assertRevert(
+          app.removeKatalyst(ZERO_BYTES32, fromUser),
+          ERROR_KATALYST_ALREADY_REMOVED
         )
       })
     })
