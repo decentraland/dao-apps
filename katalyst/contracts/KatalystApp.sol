@@ -12,6 +12,9 @@ contract KatalystApp is AragonApp {
     string constant ERROR_DOMAIN_IN_USE = "ERROR_DOMAIN_IN_USE";
     string constant ERROR_ID_IN_USE = "ERROR_ID_IN_USE";
     string constant ERROR_KATALYST_NOT_FOUND = "ERROR_KATALYST_NOT_FOUND";
+    string constant ERROR_OWNER_EMPTY = "ERROR_OWNER_EMPTY";
+    string constant ERROR_DOMAIN_EMPTY = "ERROR_DOMAIN_EMPTY";
+    string constant ERROR_KATALYST_ALREADY_REMOVED = "ERROR_KATALYST_ALREADY_REMOVED";
 
 
     struct Katalyst {
@@ -47,7 +50,12 @@ contract KatalystApp is AragonApp {
     * @param _domain - domain of the katalyst
     */
     function addKatalyst(address _owner, string  _domain) external auth(MODIFY_ROLE) {
-        bytes32 domainHash = keccak256(abi.encodePacked(_domain));
+        require(_owner != address(0), ERROR_OWNER_EMPTY);
+
+        bytes memory domain = abi.encodePacked(_domain);
+        require(domain.length > 0, ERROR_DOMAIN_EMPTY);
+
+        bytes32 domainHash = keccak256(domain);
 
         // Check if the owner and the domain are free
         require(!owners[_owner], ERROR_OWNER_IN_USE);
@@ -59,7 +67,6 @@ contract KatalystApp is AragonApp {
         bytes32 id = keccak256(
             abi.encodePacked(
                 startTime,
-                msg.sender,
                 _owner,
                 _domain
             )
@@ -100,8 +107,11 @@ contract KatalystApp is AragonApp {
         Katalyst storage katalyst = katalystById[_id];
         bytes32 domainHash = keccak256(abi.encodePacked(katalyst.domain));
 
-        require(owners[katalyst.owner], ERROR_KATALYST_NOT_FOUND);
-        require(domains[domainHash], ERROR_KATALYST_NOT_FOUND);
+        require(katalyst.id == _id, ERROR_KATALYST_NOT_FOUND);
+        require(owners[katalyst.owner], ERROR_KATALYST_ALREADY_REMOVED);
+        require(domains[domainHash], ERROR_KATALYST_ALREADY_REMOVED);
+        require(katalyst.endTime == 0, ERROR_KATALYST_ALREADY_REMOVED);
+
 
         // Katalyst length
         uint256 lastKatalystIndex = katalystCount() - 1;
