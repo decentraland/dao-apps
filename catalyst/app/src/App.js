@@ -48,7 +48,7 @@ function App() {
               <Input
                 type="text"
                 name="domain"
-                placeholder="https://decentraland.org"
+                placeholder="example.com"
                 value={domain}
                 onChange={e => setDomain(e.currentTarget.value)}
               />
