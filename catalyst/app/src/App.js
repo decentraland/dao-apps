@@ -18,8 +18,8 @@ function App() {
       error += 'Invalid Owner'
     }
 
-    if (domain.length === 0 || domain.indexOf('://') === -1) {
-      error += '\nInvalid Domain'
+    if (domain.length === 0 || domain.indexOf('://') !== -1) {
+      error += '\nInvalid Domain. It should be like: example.com'
     }
 
     if (!error) {
