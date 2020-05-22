@@ -7,10 +7,13 @@ contract StringListApp is AragonApp {
     event Add(address indexed _caller, string _value);
     event Remove(address indexed _caller,  string _value);
 
+    string constant PLACE_HOLDER = "____INVALID_PLACE_HOLER";
+
     /// Errors
     string constant ERROR_VALUE_NOT_PART_OF_THE_LIST = "ERROR_VALUE_NOT_PART_OF_THE_LIST";
     string constant ERROR_VALUE_PART_OF_THE_LIST = "ERROR_VALUE_PART_OF_THE_LIST";
     string constant ERROR_INVALID_INDEX = "ERROR_INVALID_INDEX";
+    string constant ERROR_INVALID_VALUE = "ERROR_INVALID_VALUE";
     string constant ERROR_INVALID_TYPE = "ERROR_INVALID_TYPE";
 
     /// State
@@ -42,7 +45,7 @@ contract StringListApp is AragonApp {
         listType = _type;
 
         // Invalidate first position
-        values.push("INVALID");
+        values.push(PLACE_HOLDER);
     }
 
     /**
@@ -51,7 +54,10 @@ contract StringListApp is AragonApp {
      * @param _value String value to remove
      */
     function add(string _value) external auth(ADD_ROLE) {
+        // Check if the value is part of the list
         require(indexByValue[_value] == 0, ERROR_VALUE_PART_OF_THE_LIST);
+        // Check if the value is not the placeholder
+        require(keccak256(_value) != keccak256(PLACE_HOLDER), ERROR_INVALID_VALUE);
 
         // Store the value to be looped
         uint256 index = values.push(_value);
@@ -104,7 +110,7 @@ contract StringListApp is AragonApp {
     * @return item at index
     */
     function get(uint256 _index) public view returns (string) {
-        require(_index < values.length, ERROR_INVALID_INDEX);
+        require(_index < values.length - 1, ERROR_INVALID_INDEX);
 
         return values[_index + 1];
     }
