@@ -1,0 +1,37 @@
+{
+  "roles": [
+    {
+      "name": "Add an item to the list",
+      "id": "ADD_ROLE",
+      "params": []
+    },
+    {
+      "name": "Remove an item from the list",
+      "id": "REMOVE_ROLE",
+      "params": []
+    }
+  ],
+  "environments": {
+    "default": {
+      "appName": "dcl-list.aragonpm.eth",
+      "network": "rpc"
+    },
+    "rinkeby": {
+      "registry": "0x98df287b6c145399aaa709692c8d308357bc085d",
+      "appName": "dcl-list.aragonpm.eth",
+      "network": "rinkeby"
+    },
+    "staging": {
+      "registry": "0xfe03625ea880a8cba336f9b5ad6e15b0a3b5a939",
+      "appName": "dcl-list.aragonpm.eth",
+      "network": "rinkeby"
+    },
+    "mainnet": {
+      "registry": "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+      "appName": "dcl-list.aragonpm.eth",
+      "network": "mainnet"
+    }
+  },
+  "appName": "dcl-list.aragonpm.eth",
+  "path": "contracts/ListApp.sol"
+}
