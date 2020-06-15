@@ -2,10 +2,7 @@ import 'core-js/stable'
 import 'regenerator-runtime/runtime'
 import Aragon, { events } from '@aragon/api'
 
-console.log('asdasd')
-
 const app = new Aragon()
-console.log('11111111')
 
 app.store(
   async (state, { event }) => {
@@ -44,7 +41,7 @@ function initializeState() {
   return async (cachedState) => {
     const name = await app.call('name').toPromise()
     const symbol = await app.call('symbol').toPromise()
-    const type = 'ADDRESS' // await app.call('listType').toPromise()
+    const type = 'NAME' // await app.call('listType').toPromise()
 
     app.identify(`${symbol} List`)
 

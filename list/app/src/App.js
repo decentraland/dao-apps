@@ -4,6 +4,7 @@ import { Header, Main, SyncIndicator, Text, textStyle } from '@aragon/ui'
 
 import CoordinatesList from './components/list/CoordinatesList'
 import AddressList from './components/list/AddressList'
+import NameList from './components/list/NameList'
 
 function App() {
   const { appState } = useAragonApi()
@@ -16,6 +17,8 @@ function App() {
         return <CoordinatesList />
       case 'ADDRESS':
         return <AddressList />
+      case 'NAME':
+        return <NameList />
       default:
         return null
     }

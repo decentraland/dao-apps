@@ -16,7 +16,12 @@ export default function NameList() {
     setError(null)
     try {
       if (name.length === 0) {
-        throw new Error(`Name should not be empty`)
+        throw new Error('Name should not be empty')
+      }
+
+      const regex = new RegExp('^[_A-z0-9]*((-|s)*[_A-z0-9])*$')
+      if (!regex.test(name)) {
+        throw new Error(`Invalid name: ${name}`)
       }
 
       api.add(name).toPromise()
@@ -28,19 +33,19 @@ export default function NameList() {
   return (
     <>
       <Title>{`Add a new ${symbol}`}</Title>
-      <AddAddress>
+      <AddName>
         <Input
           type="text"
           placeholder="0x123...."
           name="name"
-          value={address}
-          onChange={(e) => setAddress(e.currentTarget.value)}
+          value={name}
+          onChange={(e) => setName(e.currentTarget.value)}
         />
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Button mode="strong" disabled={!name.length} onClick={addName}>
           {`Add ${symbol}`}
         </Button>
-      </AddAddress>
+      </AddName>
       {values.length ? (
         <DataWrapper>
           <DataView
@@ -72,7 +77,7 @@ const Title = styled.h1`
   font-size: 28px;
 `
 
-const AddAddress = styled.div`
+const AddName = styled.div`
   display: flex;
   align-items: start;
   justify-content: flex-start;
