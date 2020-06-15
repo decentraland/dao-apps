@@ -2,7 +2,10 @@ import 'core-js/stable'
 import 'regenerator-runtime/runtime'
 import Aragon, { events } from '@aragon/api'
 
+console.log('asdasd')
+
 const app = new Aragon()
+console.log('11111111')
 
 app.store(
   async (state, { event }) => {

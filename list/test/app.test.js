@@ -103,7 +103,7 @@ contract('ListApp', ([appManager, user, anotherUser, hacker]) => {
       assert(await app.listType, 'COORDINATES')
     })
 
-    it('should be initialized with NAMES type', async () => {
+    it('should be initialized with NAME type', async () => {
       const { dao, acl } = await newDao(appManager)
 
       // Instantiate a proxy for the app, using the base contract as its logic implementation.
@@ -132,10 +132,10 @@ contract('ListApp', ([appManager, user, anotherUser, hacker]) => {
       )
 
       // Initialize the app's proxy.
-      await app.initialize(name, symbol, 'NAMES')
+      await app.initialize(name, symbol, 'NAME')
       assert(await app.name, name)
       assert(await app.symbol, symbol)
-      assert(await app.listType, 'NAMES')
+      assert(await app.listType, 'NAME')
     })
 
     it('should be initialized with ADDRESS type', async () => {

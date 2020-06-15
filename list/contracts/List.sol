@@ -147,11 +147,11 @@ contract ListApp is AragonApp {
         require(_isStringType(typeHash) || _isAddressType(typeHash), ERROR_INVALID_TYPE);
     }
 
-    function _isStringType(bytes32 typeHash) internal returns (bool) {
-        return typeHash == keccak256("COORDINATES") || typeHash == keccak256("NAMES");
+    function _isStringType(bytes32 typeHash) internal pure returns (bool) {
+        return typeHash == keccak256("COORDINATES") || typeHash == keccak256("NAME");
     }
 
-    function _isAddressType(bytes32 typeHash) internal returns (bool) {
+    function _isAddressType(bytes32 typeHash) internal pure returns (bool) {
         return typeHash == keccak256("ADDRESS");
     }
 
