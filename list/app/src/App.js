@@ -28,18 +28,7 @@ function App() {
   return (
     <Main theme={appearance}>
       {isSyncing && <SyncIndicator />}
-      <Header
-        primary={name}
-        secondary={
-          <Text
-            css={`
-              ${textStyle('title2')}
-            `}
-          >
-            {symbol}
-          </Text>
-        }
-      />
+      <Header primary={name} />
       {renderList()}
     </Main>
   )
