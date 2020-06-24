@@ -90,6 +90,7 @@ const Input = styled.input`
   padding: 7px;
   font-size: 14px;
   margin-bottom: 25px;
+  color: black;
 
   ::-webkit-input-placeholder {
     /* Chrome/Opera/Safari */
