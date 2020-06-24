@@ -1,5 +1,5 @@
 import React from 'react'
-import { useAragonApi } from '@aragon/api-react'
+import { useAragonApi, useGuiStyle } from '@aragon/api-react'
 import { Header, Main, SyncIndicator, Text, textStyle } from '@aragon/ui'
 
 import CoordinatesList from './components/list/CoordinatesList'
@@ -8,6 +8,7 @@ import NameList from './components/list/NameList'
 
 function App() {
   const { appState } = useAragonApi()
+  const { appearance } = useGuiStyle()
 
   const { name, symbol, type, isSyncing } = appState
 
@@ -25,7 +26,7 @@ function App() {
   }
 
   return (
-    <Main>
+    <Main theme={appearance}>
       {isSyncing && <SyncIndicator />}
       <Header
         primary={name}

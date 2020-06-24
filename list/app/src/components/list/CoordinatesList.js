@@ -31,7 +31,13 @@ export default function CoordinatesList() {
         )
       }
 
-      api.add(`${x.trim()},${y.trim()}`).toPromise()
+      const coordinates = `${x.trim()},${y.trim()}`
+
+      if (values.includes(coordinates)) {
+        throw new Error(`The ${symbol}: ${coordinates} is already on the list`)
+      }
+
+      api.add(coordinates).toPromise()
     } catch (e) {
       setError(e.message)
     }
@@ -55,7 +61,6 @@ export default function CoordinatesList() {
           value={y}
           onChange={(e) => setY(e.currentTarget.value)}
         />
-        {error && <ErrorMessage>{error}</ErrorMessage>}
         <Button
           mode="strong"
           disabled={!x.length || !y.length}
@@ -64,6 +69,7 @@ export default function CoordinatesList() {
           {`Add ${symbol}`}
         </Button>
       </AddCoordinate>
+      <p> {error && <ErrorMessage>{error}</ErrorMessage>}</p>
       {values.length ? (
         <DataWrapper>
           <DataView
@@ -131,6 +137,7 @@ const ErrorMessage = styled.p`
   color: #fd4949;
   white-space: pre-line;
   margin-bottom: 10px;
+  margin-top: 10px;
 `
 
 const DataWrapper = styled.div`
