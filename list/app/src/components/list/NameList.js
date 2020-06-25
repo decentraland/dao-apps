@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useAragonApi } from '@aragon/api-react'
-import { Button, DataView, IdentityBadge } from '@aragon/ui'
-import { ethers } from 'ethers'
+import { Button, DataView } from '@aragon/ui'
 import styled from 'styled-components'
 
 export default function NameList() {

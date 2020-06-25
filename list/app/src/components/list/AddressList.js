@@ -5,7 +5,6 @@ import { ethers } from 'ethers'
 import styled from 'styled-components'
 
 function AsyncName({ address }) {
-  const { api } = useAragonApi()
   const [name, setName] = useState('N/A')
 
   useEffect(() => {
@@ -19,19 +18,16 @@ function AsyncName({ address }) {
       'function symbol() view returns (string value)',
     ]
 
-    console.log(web3, await web3.eth.getAccounts())
-    let provider = new ethers.providers.JsonRpcProvider('http://localhost:8545')
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
 
     // The address from the above deployment example
 
     // We connect to the Contract using a Provider, so we will only
     // have read-only access to the Contract
     try {
-      console.log(provider, api)
       const contract = new ethers.Contract(address, abi, provider)
       return setName(`${await contract.symbol()} (${await contract.name()})`)
     } catch (e) {
-      console.log(e.message)
       return setName('N/A')
     }
   }

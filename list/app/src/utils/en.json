@@ -1,0 +1,6 @@
+{
+  "denylist:name": {
+    "title": "Denylist of names",
+    "description": "Add a name to be banned in Decentraland"
+  }
+}
