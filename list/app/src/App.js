@@ -27,7 +27,7 @@ function App() {
     }
   }
 
-  const locale = locales[name]
+  const locale = locales[name.toLowerCase()]
   const title = locale ? locale.title : name
   const description = locale ? locale.description : null
 
