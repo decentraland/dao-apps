@@ -23,6 +23,10 @@ export default function NameList() {
         throw new Error(`Invalid name: ${name}`)
       }
 
+      if (values.map((v) => v.toLowerCase()).includes(name.toLowerCase())) {
+        throw new Error(`The ${symbol}: ${name} is already on the list`)
+      }
+
       api.add(name).toPromise()
     } catch (e) {
       setError(e.message)
@@ -35,7 +39,7 @@ export default function NameList() {
       <AddName>
         <Input
           type="text"
-          placeholder="0x123...."
+          placeholder="Wade"
           name="name"
           value={name}
           onChange={(e) => setName(e.currentTarget.value)}

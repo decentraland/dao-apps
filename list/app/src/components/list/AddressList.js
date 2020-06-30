@@ -56,6 +56,10 @@ export default function AddressList() {
     try {
       const addressToAdd = getChecksumAddress()
 
+      if (values.includes(addressToAdd)) {
+        throw new Error(`The ${symbol}: ${addressToAdd} is already on the list`)
+      }
+
       api.add(addressToAdd).toPromise()
     } catch (e) {
       setError(e.message)
