@@ -41,7 +41,7 @@ function initializeState() {
   return async (cachedState) => {
     const name = await app.call('name').toPromise()
     const symbol = await app.call('symbol').toPromise()
-    const type = 'NAME' // await app.call('listType').toPromise()
+    const type = await app.call('listType').toPromise()
 
     app.identify(`${symbol} List`)
 
