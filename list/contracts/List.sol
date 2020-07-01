@@ -51,7 +51,7 @@ contract ListApp is AragonApp {
 
     /**
      * @dev Add a value to the  list
-     * @notice Add "`_value`" to the `self.symbol(): string` list
+     * @notice Add "`_value`" to the `self.symbol(): string` list. `self.getTypeHash(): bytes32 == 0x55d2d27e31c4cb7b29e0a26c4da29beed88162ab503267550adc2b08511eb9f1 ? 'Take a look: https://play.decentraland.org/?position=' + _value : ''`
      * @param _value String value to remove
      */
     function add(string _value) external auth(ADD_ROLE) {
@@ -60,7 +60,7 @@ contract ListApp is AragonApp {
         // Check if the value is not the placeholder
         require(keccak256(_value) != keccak256(PLACE_HOLDER), ERROR_INVALID_VALUE);
 
-        bytes32 typeHash = keccak256(listType);
+        bytes32 typeHash = getTypeHash();
 
         if (_isStringType(typeHash)) {
             _add(_value);
@@ -116,6 +116,10 @@ contract ListApp is AragonApp {
         require(_index < values.length - 1, ERROR_INVALID_INDEX);
 
         return values[_index + 1];
+    }
+
+    function getTypeHash()public view returns (bytes32) {
+        return keccak256(listType);
     }
 
     /**

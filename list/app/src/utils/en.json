@@ -1,6 +1,10 @@
 {
   "denylist:name": {
     "title": "Denylist of names",
-    "description": "Add a name to be banned in Decentraland"
+    "description": "Add a name you consider offensive to be denied in Decentraland. Once approved, the name will no longer be shown in the client"
+  },
+  "allowlist:poi": {
+    "title": "Poin of interest",
+    "description": "Points of interest are placed all over the map and function as a way to visualize interesting places"
   }
 }

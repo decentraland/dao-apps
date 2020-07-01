@@ -1,7 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAragonApi } from '@aragon/api-react'
 import { Button, DataView } from '@aragon/ui'
 import styled from 'styled-components'
+
+function AsyncTitle({ coordinates, defaultText = 'N/A' }) {
+  const [title, setTitle] = useState(defaultText)
+
+  useEffect(() => {
+    fetchScene()
+  }, [coordinates])
+
+  async function fetchScene() {
+    try {
+      const res = await fetch(
+        `https://peer.decentraland.org/content/entities/scenes?pointer=${coordinates}`
+      )
+      const data = await res.json()
+
+      return setTitle(data[0].metadata.display.title)
+    } catch (e) {
+      return setTitle(defaultText)
+    }
+  }
+
+  return <p>{title}</p>
+}
 
 export default function CoordinatesList() {
   const { api, appState } = useAragonApi()
@@ -37,11 +60,29 @@ export default function CoordinatesList() {
         throw new Error(`The ${symbol}: ${coordinates} is already on the list`)
       }
 
-      api.add(coordinates).toPromise()
+      fetch(
+        `https://peer.decentraland.org/content/entities/scenes?pointer=${coordinates}`
+      ).then((res) =>
+        res.json().then((data) => {
+          if (data[0]) {
+            const pointers = data[0].pointers
+            if (pointers.includes(coordinates)) {
+              setError(
+                `The coordinates: ${coordinates} is part of the ${symbol}: ${data[0].metadata.display.title}`
+              )
+              return
+            }
+          }
+          api.add(coordinates).toPromise()
+        })
+      )
     } catch (e) {
       setError(e.message)
     }
   }
+
+  const isValid =
+    x.length && y.length && isValidCoordinate(x) && isValidCoordinate(y)
 
   return (
     <>
@@ -61,24 +102,34 @@ export default function CoordinatesList() {
           value={y}
           onChange={(e) => setY(e.currentTarget.value)}
         />
-        <Button
+        <ButtonWithExtra
           mode="strong"
           disabled={!x.length || !y.length}
           onClick={addPOI}
         >
           {`Add ${symbol}`}
-        </Button>
+          {isValid ? (
+            <>
+              <span>:</span>
+              <AsyncTitle
+                style={{ paddingLeft: '10px' }}
+                coordinates={`${x},${y}`}
+              />
+            </>
+          ) : null}
+        </ButtonWithExtra>
       </AddCoordinate>
-      <p> {error && <ErrorMessage>{error}</ErrorMessage>}</p>
+      {error && <ErrorMessage>{error}</ErrorMessage>}
       {values.length ? (
         <DataWrapper>
           <DataView
             mode="table"
-            fields={['POI', 'Actions']}
+            fields={['Coordinates', 'Title', 'Actions']}
             entries={values}
             renderEntry={(value) => {
               const row = [
                 <p>{value}</p>,
+                <AsyncTitle coordinates={value} />,
                 <Button
                   mode="normal"
                   onClick={() => api.remove(value).toPromise()}
@@ -144,4 +195,10 @@ const ErrorMessage = styled.p`
 const DataWrapper = styled.div`
   width: 100%;
   margin-top: 40px;
+`
+
+const ButtonWithExtra = styled(Button)`
+  p {
+    padding-left: 5px;
+  }
 `
