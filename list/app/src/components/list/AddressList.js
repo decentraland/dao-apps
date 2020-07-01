@@ -43,8 +43,6 @@ export default function AddressList() {
 
   const { symbol, values } = appState
 
-  console.log(values)
-
   function getChecksumAddress() {
     try {
       return ethers.utils.getAddress(address)
