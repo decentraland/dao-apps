@@ -43,6 +43,8 @@ export default function AddressList() {
 
   const { symbol, values } = appState
 
+  console.log(values)
+
   function getChecksumAddress() {
     try {
       return ethers.utils.getAddress(address)
@@ -114,6 +116,9 @@ export default function AddressList() {
 const Title = styled.h1`
   margin-top: 40px;
   font-size: 28px;
+  @media (max-width: 768px) {
+    text-align: center;
+  }
 `
 
 const AddAddress = styled.div`
@@ -122,6 +127,10 @@ const AddAddress = styled.div`
   justify-content: flex-start;
   flex-direction: column;
   margin-top: 20px;
+  @media (max-width: 768px) {
+    align-items: center;
+    justify-content: center;
+  }
 `
 
 const Input = styled.input`

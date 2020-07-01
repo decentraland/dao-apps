@@ -43,10 +43,22 @@ function App() {
 
 const HeaderWithSub = styled(Header)`
   padding-bottom: 10px;
+  @media (max-width: 768px) {
+    box-shadow: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
 `
 
 const SubHeader = styled.div`
   text-align: left;
+  @media (max-width: 768px) {
+    padding: 0 16px;
+    background-color: white;
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.05);
+    text-align: left;
+    padding-bottom: 10px;
+  }
 `
 
 export default App

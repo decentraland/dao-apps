@@ -28,7 +28,6 @@ function AsyncTitle({ coordinates, defaultText = 'N/A' }) {
 
 export default function CoordinatesList() {
   const { api, appState } = useAragonApi()
-
   const [x, setX] = useState('')
   const [y, setY] = useState('')
   const [error, setError] = useState('')
@@ -66,11 +65,13 @@ export default function CoordinatesList() {
         res.json().then((data) => {
           if (data[0]) {
             const pointers = data[0].pointers
-            if (pointers.includes(coordinates)) {
-              setError(
-                `The coordinates: ${coordinates} is part of the ${symbol}: ${data[0].metadata.display.title}`
-              )
-              return
+            for (let value of values) {
+              if (pointers.includes(value)) {
+                setError(
+                  `The coordinates: ${coordinates} is part of the ${symbol}: ${data[0].metadata.display.title}`
+                )
+                return
+              }
             }
           }
           api.add(coordinates).toPromise()
@@ -150,6 +151,9 @@ export default function CoordinatesList() {
 const Title = styled.h1`
   margin-top: 40px;
   font-size: 28px;
+  @media (max-width: 768px) {
+    text-align: center;
+  }
 `
 
 const AddCoordinate = styled.div`
@@ -158,6 +162,9 @@ const AddCoordinate = styled.div`
   justify-content: flex-start;
   flex-direction: row;
   margin-top: 20px;
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
 `
 
 const Input = styled.input`

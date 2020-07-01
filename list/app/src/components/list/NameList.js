@@ -78,6 +78,9 @@ export default function NameList() {
 const Title = styled.h1`
   margin-top: 40px;
   font-size: 28px;
+  @media (max-width: 768px) {
+    text-align: center;
+  }
 `
 
 const AddName = styled.div`
@@ -86,6 +89,10 @@ const AddName = styled.div`
   justify-content: flex-start;
   flex-direction: column;
   margin-top: 20px;
+  @media (max-width: 768px) {
+    align-items: center;
+    justify-content: center;
+  }
 `
 
 const Input = styled.input`
