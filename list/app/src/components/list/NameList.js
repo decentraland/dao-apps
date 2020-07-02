@@ -26,7 +26,7 @@ export default function NameList() {
       }
 
       if (values.map((v) => v.toLowerCase()).includes(name.toLowerCase())) {
-        throw new Error(`The ${symbol}: ${name} is already on the list`)
+        throw new Error(`The ${appSymbol}: ${name} is already on the list`)
       }
 
       api.add(name).toPromise()
@@ -50,7 +50,7 @@ export default function NameList() {
         />
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Button mode="strong" disabled={!name.length} onClick={addName}>
-          {`Add ${symbol}`}
+          {locale.get('add_new_cta')}
         </Button>
       </AddName>
       {values.length ? (

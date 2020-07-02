@@ -11,7 +11,7 @@ import NameList from './components/list/NameList'
 function App() {
   const { appState } = useAragonApi()
   const { appearance } = useGuiStyle()
-  console.log(appState)
+
   const { appName, appType, isSyncing } = appState
 
   function renderList() {
