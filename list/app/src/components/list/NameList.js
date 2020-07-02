@@ -3,13 +3,15 @@ import { useAragonApi } from '@aragon/api-react'
 import { Button, DataView } from '@aragon/ui'
 import styled from 'styled-components'
 
+import { getLocale } from '../../utils/locales'
+
 export default function NameList() {
   const { api, appState } = useAragonApi()
 
   const [name, setName] = useState('')
   const [error, setError] = useState('')
 
-  const { symbol, values } = appState
+  const { appName, appSymbol, values } = appState
 
   function addName() {
     setError(null)
@@ -33,9 +35,11 @@ export default function NameList() {
     }
   }
 
+  const locale = getLocale(appName)
+
   return (
     <>
-      <Title>{`Add a new ${symbol}`}</Title>
+      <Title>{locale.get('add_new_title')}</Title>
       <AddName>
         <Input
           type="text"

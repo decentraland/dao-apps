@@ -1,10 +1,16 @@
 {
   "denylist:name": {
+    "app_identify": "Name Denylist",
     "title": "Denylist of names",
-    "description": "Add a name you consider offensive to be denied in Decentraland. Once approved, the name will no longer be shown in the client"
+    "description": "Add a name you consider offensive to be denied in Decentraland. Once approved, the name will no longer be shown in the client",
+    "add_new_title": "Deny a name",
+    "add_new_cta": "Submit"
   },
   "allowlist:poi": {
+    "app_identify": "POI List",
     "title": "Poin of interest",
-    "description": "Points of interest are placed all over the map and function as a way to visualize interesting places"
+    "description": "Points of interest are placed all over the map and function as a way to visualize interesting places",
+    "add_new_title": "Add a new POI",
+    "add_new_cta": "Add POI"
   }
 }

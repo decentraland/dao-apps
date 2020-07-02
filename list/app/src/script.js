@@ -2,6 +2,8 @@ import 'core-js/stable'
 import 'regenerator-runtime/runtime'
 import Aragon, { events } from '@aragon/api'
 
+import { getLocale } from './utils/locales'
+
 const app = new Aragon()
 
 app.store(
@@ -39,17 +41,19 @@ app.store(
 
 function initializeState() {
   return async (cachedState) => {
-    const name = await app.call('name').toPromise()
-    const symbol = await app.call('symbol').toPromise()
-    const type = await app.call('listType').toPromise()
+    const appName = await app.call('name').toPromise()
+    const appSymbol = await app.call('symbol').toPromise()
+    const appType = await app.call('listType').toPromise()
 
-    app.identify(`${symbol} List`)
+    const locale = getLocale(appName)
+
+    app.identify(locale.get('app_identify'))
 
     return {
       ...cachedState,
-      name,
-      symbol,
-      type,
+      appName,
+      appSymbol,
+      appType,
       values: await getValues(),
     }
   }

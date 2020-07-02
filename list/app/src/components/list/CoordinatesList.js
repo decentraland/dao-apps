@@ -3,6 +3,8 @@ import { useAragonApi } from '@aragon/api-react'
 import { Button, DataView } from '@aragon/ui'
 import styled from 'styled-components'
 
+import { getLocale } from '../../utils/locales'
+
 function AsyncTitle({ coordinates, defaultText = 'N/A' }) {
   const [title, setTitle] = useState(defaultText)
 
@@ -32,7 +34,7 @@ export default function CoordinatesList() {
   const [y, setY] = useState('')
   const [error, setError] = useState('')
 
-  const { symbol, values } = appState
+  const { appName, appSymbol, values } = appState
 
   function isValidCoordinate(i) {
     return !isNaN(i) && i >= -150 && i <= 150
@@ -56,7 +58,9 @@ export default function CoordinatesList() {
       const coordinates = `${x.trim()},${y.trim()}`
 
       if (values.includes(coordinates)) {
-        throw new Error(`The ${symbol}: ${coordinates} is already on the list`)
+        throw new Error(
+          `The ${appSymbol}: ${coordinates} is already on the list`
+        )
       }
 
       fetch(
@@ -68,7 +72,7 @@ export default function CoordinatesList() {
             for (let value of values) {
               if (pointers.includes(value)) {
                 setError(
-                  `The coordinates: ${coordinates} is part of the ${symbol}: ${data[0].metadata.display.title}`
+                  `The coordinates: ${coordinates} is part of the ${appSymbol}: ${data[0].metadata.display.title}`
                 )
                 return
               }
@@ -85,9 +89,11 @@ export default function CoordinatesList() {
   const isValid =
     x.length && y.length && isValidCoordinate(x) && isValidCoordinate(y)
 
+  const locale = getLocale(appName)
+
   return (
     <>
-      <Title>{`Add a new ${symbol}`}</Title>
+      <Title>{locale.get('add_new_title')}</Title>
       <AddCoordinate>
         <Input
           type="text"
@@ -108,7 +114,7 @@ export default function CoordinatesList() {
           disabled={!x.length || !y.length}
           onClick={addPOI}
         >
-          {`Add ${symbol}`}
+          {locale.get('add_new_cta')}
           {isValid ? (
             <>
               <span>:</span>

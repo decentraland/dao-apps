@@ -3,7 +3,7 @@ import { useAragonApi, useGuiStyle } from '@aragon/api-react'
 import { Header, Main, SyncIndicator } from '@aragon/ui'
 import styled from 'styled-components'
 
-import { locales } from './utils/locales'
+import { getLocale } from './utils/locales'
 import CoordinatesList from './components/list/CoordinatesList'
 import AddressList from './components/list/AddressList'
 import NameList from './components/list/NameList'
@@ -11,11 +11,11 @@ import NameList from './components/list/NameList'
 function App() {
   const { appState } = useAragonApi()
   const { appearance } = useGuiStyle()
-
-  const { name, type, isSyncing } = appState
+  console.log(appState)
+  const { appName, appType, isSyncing } = appState
 
   function renderList() {
-    switch (type) {
+    switch (appType) {
       case 'COORDINATES':
         return <CoordinatesList />
       case 'ADDRESS':
@@ -27,15 +27,15 @@ function App() {
     }
   }
 
-  const locale = locales[name.toLowerCase()]
-  const title = locale ? locale.title : name
-  const description = locale ? locale.description : null
+  const locale = getLocale(appName)
+  const title = locale.get('title')
+  const description = locale.get('description')
 
   return (
     <Main theme={appearance}>
       {isSyncing && <SyncIndicator />}
       <HeaderWithSub primary={title} />
-      {description && <SubHeader>{description}</SubHeader>}
+      {description.length > 0 && <SubHeader>{description}</SubHeader>}
       {renderList()}
     </Main>
   )

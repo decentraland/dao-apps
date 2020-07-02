@@ -4,6 +4,8 @@ import { Button, DataView, IdentityBadge } from '@aragon/ui'
 import { ethers } from 'ethers'
 import styled from 'styled-components'
 
+import { getLocale } from '../../utils/locales'
+
 function AsyncName({ address }) {
   const [name, setName] = useState('N/A')
 
@@ -41,7 +43,7 @@ export default function AddressList() {
   const [address, setAddress] = useState('')
   const [error, setError] = useState('')
 
-  const { symbol, values } = appState
+  const { appName, appSymbol, values } = appState
 
   function getChecksumAddress() {
     try {
@@ -57,7 +59,9 @@ export default function AddressList() {
       const addressToAdd = getChecksumAddress()
 
       if (values.includes(addressToAdd)) {
-        throw new Error(`The ${symbol}: ${addressToAdd} is already on the list`)
+        throw new Error(
+          `The ${appSymbol}: ${addressToAdd} is already on the list`
+        )
       }
 
       api.add(addressToAdd).toPromise()
@@ -66,9 +70,11 @@ export default function AddressList() {
     }
   }
 
+  const locale = getLocale(appName)
+
   return (
     <>
-      <Title>{`Add a new ${symbol}`}</Title>
+      <Title>{locale.get('add_new_title')}</Title>
       <AddAddress>
         <Input
           type="text"
@@ -79,7 +85,7 @@ export default function AddressList() {
         />
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Button mode="strong" disabled={!address.length} onClick={addAddress}>
-          {`Add ${symbol}`}
+          {locale.get('add_new_cta')}
         </Button>
       </AddAddress>
       {values.length ? (

@@ -5,7 +5,13 @@ import App from './App'
 
 const reducer = (state) => {
   if (state === null) {
-    return { name: '', symbol: '', type: '', values: [], isSyncing: true }
+    return {
+      appName: '',
+      appSymbol: '',
+      appType: '',
+      values: [],
+      isSyncing: true,
+    }
   }
   return state
 }
