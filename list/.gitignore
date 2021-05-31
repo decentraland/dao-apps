@@ -1,8 +1,11 @@
 node_modules
-artifacts
 .cache
 cache
+artifacts
 dist
 ipfs.cmd
 package-lock.json
+coverage.json
+coverage
+.env
 .DS_STORE
