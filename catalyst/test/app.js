@@ -1,13 +1,14 @@
-/* global artifacts contract beforeEach it assert */
-
 const { assertRevert } = require('@aragon/test-helpers/assertThrow')
 const { getEventArgument } = require('@aragon/test-helpers/events')
 const { assertEvent } = require('@aragon/test-helpers/assertEvent')(web3)
 const { hash } = require('eth-ens-namehash')
-const deployDAO = require('./helpers/deployDAO')
 const sleep = require('./helpers/sleep')
 
-const CatalystApp = artifacts.require('CatalystApp.sol')
+const CatalystApp = artifacts.require('CatalystApp')
+const Kernel = artifacts.require("Kernel");
+const ACL = artifacts.require("ACL");
+const EVMScriptRegistryFactory = artifacts.require("EVMScriptRegistryFactory");
+const DAOFactory = artifacts.require("DAOFactory");
 
 const APP_AUTH_FAILED = 'APP_AUTH_FAILED'
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -29,6 +30,35 @@ async function getBlockTimestamp(blockNumber) {
   const block = await web3.eth.getBlock(blockNumber || web3.eth.blockNumber)
   return block.timestamp
 }
+
+const deployDAO = async (appManager) => {
+  // Deploy a DAOFactory.
+  const kernelBase = await Kernel.new(true);
+  const aclBase = await ACL.new();
+  const registryFactory = await EVMScriptRegistryFactory.new();
+  const daoFactory = await DAOFactory.new(
+    kernelBase.address,
+    aclBase.address,
+    registryFactory.address
+  );
+
+  // Create a DAO instance.
+  const daoReceipt = await daoFactory.newDAO(appManager);
+  const dao = Kernel.at(getEventArgument(daoReceipt, "DeployDAO", "dao"));
+
+  // Grant the appManager address permission to install apps in the DAO.
+  const acl = ACL.at(await dao.acl());
+  const APP_MANAGER_ROLE = await kernelBase.APP_MANAGER_ROLE();
+  await acl.createPermission(
+    appManager,
+    dao.address,
+    APP_MANAGER_ROLE,
+    appManager,
+    { from: appManager }
+  );
+
+  return { dao, acl };
+};
 
 contract(
   'CatalystApp',
