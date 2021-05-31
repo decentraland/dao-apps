@@ -1,8 +1,10 @@
 node_modules
-build
 .cache
+cache
+artifacts
 dist
 ipfs.cmd
 package-lock.json
 coverage.json
 coverage
+.env
