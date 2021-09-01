@@ -17,7 +17,14 @@
     "app_identify": "Wearables List",
     "title": "Wearables allowlist",
     "description": "",
-    "add_new_title": "Add a address",
+    "add_new_title": "Add a collection",
+    "add_new_cta": "Submit"
+  }
+  "denylist:address": {
+    "app_identify": "Address Denylist",
+    "title": "Denylist of addresses",
+    "description": "",
+    "add_new_title": "Add an address",
     "add_new_cta": "Submit"
   }
 }
