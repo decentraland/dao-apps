@@ -19,7 +19,7 @@
     "description": "",
     "add_new_title": "Add a collection",
     "add_new_cta": "Submit"
-  }
+  },
   "denylist:address": {
     "app_identify": "Address Denylist",
     "title": "Denylist of addresses",
