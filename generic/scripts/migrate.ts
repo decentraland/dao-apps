@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 
 async function main() {
   const List = await ethers.getContractFactory("StringList");
-  const list = await List.attach("0x4b09a3A8CF7F0aab1DC8A9D931C10958295E42b3");
+  const list = await List.attach("0xFEC09d5C192aaf7Ec7E2C89Cc8D3224138391B2E");
 
   const pois = await getPois();
   console.log(`Creating ${pois.length} points of interests:`);

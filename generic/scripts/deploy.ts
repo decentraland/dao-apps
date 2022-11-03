@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 
 async function main() {
   const List = await ethers.getContractFactory("StringList");
-  const list = await List.deploy("Points of Interests");
+  const list = await List.deploy("Points of Interest");
 
   await list.deployed();
 
