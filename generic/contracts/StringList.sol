@@ -9,6 +9,7 @@ contract StringList is Ownable {
     event Remove(address indexed _caller,  string _value);
 
     string constant PLACE_HOLDER = "____INVALID_PLACE_HOLER";
+    bytes32 constant PLACE_HOLDER_HASH = keccak256(abi.encodePacked(PLACE_HOLDER));
 
     /// Errors
     string constant ERROR_VALUE_NOT_PART_OF_THE_LIST = "ERROR_VALUE_NOT_PART_OF_THE_LIST";
@@ -23,7 +24,7 @@ contract StringList is Ownable {
 
     /**
      * @dev Initialize contract
-     * @notice Create a new list with name `_name`
+     * @notice Create a new list with name `_name`, ownership will be assiged to deployer address.
      * @param _name The list's display name
      */
     constructor(string memory _name) {
@@ -35,7 +36,7 @@ contract StringList is Ownable {
 
     /**
      * @dev Add a value to the  list
-     * @notice Add "`_value`" to the string` list.
+     * @notice Add `_value` to the string list.
      * @param _value String value to remove
      */
     function add(string calldata _value) external onlyOwner {
@@ -43,14 +44,14 @@ contract StringList is Ownable {
         require(indexByValue[_value] == 0, ERROR_VALUE_PART_OF_THE_LIST);
 
         // Check if the value is not the placeholder
-        require(keccak256(abi.encodePacked(_value)) != keccak256(abi.encodePacked(PLACE_HOLDER)), ERROR_INVALID_VALUE);
+        require(keccak256(abi.encodePacked(_value)) != PLACE_HOLDER_HASH, ERROR_INVALID_VALUE);
 
         _add(_value);
     }
 
     /**
      * @dev Remove a value from the list
-     * @notice Remove "`_value`" from the `self.symbol(): string` list
+     * @notice Remove `_value` from the string list
      * @param _value String value to remove
      */
     function remove(string calldata _value) external onlyOwner {
@@ -90,7 +91,7 @@ contract StringList is Ownable {
     * @return item at index
     */
     function get(uint256 _index) public view returns (string memory) {
-        require(_index < values.length - 1, ERROR_INVALID_INDEX);
+        require(_index < size(), ERROR_INVALID_INDEX);
 
         return values[_index + 1];
     }
@@ -104,7 +105,7 @@ contract StringList is Ownable {
         values.push(_value);
 
         // Save mapping of the value within its position in the array
-        indexByValue[_value] = values.length - 1;
+        indexByValue[_value] = size();
 
         emit Add(msg.sender, _value);
     }
